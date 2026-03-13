@@ -18,3 +18,13 @@ services:
         value: 7d
       - key: CLIENT_URL
         sync: false
+
+  - type: web
+    name: dpfcss-frontend
+    env: static
+    rootDir: dpfcss-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
