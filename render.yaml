@@ -2,6 +2,7 @@ services:
   - type: web
     name: dpfcss-backend
     env: node
+    plan: free
     rootDir: dpfcss-backend
     buildCommand: npm install
     startCommand: npm start
