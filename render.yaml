@@ -18,7 +18,7 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: CLIENT_URL
-        sync: false
+        sync: false  # e.g. https://dpfcss-frontend.vercel.app
 
   - type: web
     name: dpfcss-frontend
@@ -28,4 +28,4 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        sync: false
+        sync: false  # e.g. https://dpfcss-backend.onrender.com/api

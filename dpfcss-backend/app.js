@@ -11,8 +11,20 @@ const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 
-// Middleware
-app.use(cors({ origin: '*', credentials: true }));
+// Middleware — restrict CORS to deployed frontend URL in production
+const allowedOrigins = [
+  process.env.CLIENT_URL,          // e.g. https://dpfcss-frontend.vercel.app
+  'http://localhost:5173',          // local Vite dev
+  'http://localhost:4173',          // local Vite preview
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS blocked: ${origin}`));
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(morgan('dev'));
 
