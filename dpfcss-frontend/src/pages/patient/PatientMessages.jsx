@@ -26,7 +26,7 @@ function MessagingPage() {
         const load = () =>
             api.get(`/messages/${selected.partner._id}`).then((r) => setMessages(r.data));
         load();
-        pollInterval.current = setInterval(load, 5000); // poll every 5s (low-bandwidth friendly)
+        pollInterval.current = setInterval(load, 5000);
         return () => clearInterval(pollInterval.current);
     }, [selected]);
 
@@ -54,24 +54,30 @@ function MessagingPage() {
         <div>
             <Sidebar />
             <main className="page-content" style={{ padding: 0, height: '100vh', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ margin: '1.5rem 2rem 0', display: 'flex', alignItems: 'center', gap: 8, marginBottom: '1rem' }}>
-                    <MessageCircle size={20} color="#2074e8" />
-                    <h1 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#1a2540' }}>Messages</h1>
+                <div style={{ margin: '1.5rem 2rem 1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <MessageCircle size={20} color="var(--accent-blue)" />
+                    <h1 style={{ fontWeight: 800, fontSize: '1.4rem', color: 'var(--text-primary)' }}>Messages</h1>
                 </div>
 
-                <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '300px 1fr', margin: '0 2rem 2rem', borderRadius: '1rem', border: '1px solid #e2e8f4', overflow: 'hidden', background: 'white', minHeight: 0 }}>
-                    {/* Sidebar conversation list */}
-                    <div style={{ borderRight: '1px solid #e2e8f4', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                        <div style={{ padding: '1rem', borderBottom: '1px solid #e2e8f4' }}>
+                <div style={{
+                    flex: 1, display: 'grid', gridTemplateColumns: '300px 1fr',
+                    margin: '0 2rem 2rem', borderRadius: '1rem',
+                    border: '1px solid var(--border)', overflow: 'hidden',
+                    background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
+                    minHeight: 0,
+                }}>
+                    {/* Conversation list */}
+                    <div style={{ borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>
                             <div style={{ position: 'relative' }}>
-                                <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                                <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                                 <input className="input" style={{ paddingLeft: '2.1rem', padding: '0.55rem 0.75rem 0.55rem 2.1rem', fontSize: '0.85rem' }}
                                     placeholder="Search chats..." value={search} onChange={(e) => setSearch(e.target.value)} />
                             </div>
                         </div>
                         <div style={{ flex: 1, overflowY: 'auto' }}>
                             {filtered.length === 0 && (
-                                <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
+                                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                                     No conversations yet
                                 </div>
                             )}
@@ -80,21 +86,21 @@ function MessagingPage() {
                                     onClick={() => setSelected(conv)}
                                     style={{
                                         padding: '0.875rem 1rem', cursor: 'pointer', display: 'flex', gap: '0.75rem', alignItems: 'center',
-                                        borderBottom: '1px solid #f1f5f9',
-                                        background: selected?.partner._id === conv.partner._id ? '#f0f7ff' : 'transparent',
+                                        borderBottom: '1px solid var(--border)',
+                                        background: selected?.partner._id === conv.partner._id ? 'rgba(14,165,233,0.1)' : 'transparent',
                                         transition: 'background 0.15s',
                                     }}>
-                                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #dbeefe, #ccfbf1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#2074e8', flexShrink: 0, fontSize: '0.9rem' }}>
+                                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(14,165,233,0.3), rgba(6,214,160,0.3))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'var(--accent-blue)', flexShrink: 0, fontSize: '0.9rem' }}>
                                         {conv.partner.name?.charAt(0)}
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <p style={{ fontWeight: 600, fontSize: '0.875rem', color: '#1a2540' }}>{conv.partner.name}</p>
+                                            <p style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>{conv.partner.name}</p>
                                             {conv.unreadCount > 0 && (
                                                 <span className="badge badge-blue" style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem' }}>{conv.unreadCount}</span>
                                             )}
                                         </div>
-                                        <p style={{ fontSize: '0.78rem', color: '#94a3b8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '0.1rem' }}>
+                                        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '0.1rem' }}>
                                             {conv.lastMessage?.content || 'No messages yet'}
                                         </p>
                                     </div>
@@ -106,20 +112,20 @@ function MessagingPage() {
                     {/* Chat window */}
                     <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         {!selected ? (
-                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem', color: '#94a3b8' }}>
+                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem', color: 'var(--text-muted)' }}>
                                 <MessageCircle size={48} strokeWidth={1} />
                                 <p style={{ fontSize: '1rem' }}>Select a conversation to start messaging</p>
                             </div>
                         ) : (
                             <>
                                 {/* Chat header */}
-                                <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #e2e8f4', display: 'flex', alignItems: 'center', gap: '0.875rem', background: 'white' }}>
-                                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg, #dbeefe, #ccfbf1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#2074e8', fontSize: '0.9rem' }}>
+                                <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.875rem', background: 'rgba(10,20,50,0.5)' }}>
+                                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(14,165,233,0.3), rgba(6,214,160,0.3))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'var(--accent-blue)', fontSize: '0.9rem' }}>
                                         {selected.partner.name?.charAt(0)}
                                     </div>
                                     <div>
-                                        <p style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1a2540' }}>{selected.partner.name}</p>
-                                        <p style={{ fontSize: '0.78rem', color: '#64748b', textTransform: 'capitalize' }}>
+                                        <p style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{selected.partner.name}</p>
+                                        <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
                                             {selected.partner.role}{selected.partner.specialization ? ` • ${selected.partner.specialization}` : ''}
                                         </p>
                                     </div>
@@ -136,7 +142,7 @@ function MessagingPage() {
                                                 <div className={`chat-bubble ${isSent ? 'sent' : 'received'}`}>
                                                     {msg.content}
                                                 </div>
-                                                <span style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '0.2rem' }}>
+                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
                                                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </motion.div>
@@ -146,7 +152,7 @@ function MessagingPage() {
                                 </div>
 
                                 {/* Input */}
-                                <form onSubmit={sendMessage} style={{ padding: '1rem 1.25rem', borderTop: '1px solid #e2e8f4', display: 'flex', gap: '0.75rem', background: 'white' }}>
+                                <form onSubmit={sendMessage} style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '0.75rem', background: 'rgba(5,12,30,0.7)' }}>
                                     <input className="input" style={{ flex: 1 }}
                                         placeholder="Type a message..." value={input}
                                         onChange={(e) => setInput(e.target.value)} />
