@@ -23,6 +23,6 @@ Thumbs.db
 .idea/
 
 # n8n workflow files (separate from DPFCSS project)
-*.json
+# *.json
 docker-compose*.yml
 Dockerfile*
