@@ -1,9 +1,12 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { useState, useEffect } from 'react';
 
 import useAuthStore from './store/authStore';
 
 import LandingPage from './pages/LandingPage';
+import ManifestoPage from './pages/ManifestoPage';
+import SystemPage from './pages/SystemPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 
@@ -29,6 +32,26 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
+function RouteChangeLoader() {
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    const t = setTimeout(() => setLoading(false), 500); // simulate 500ms route transition
+    return () => clearTimeout(t);
+  }, [location.pathname]);
+
+  if (!loading) return null;
+
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '3px', backgroundColor: 'transparent', zIndex: 9999 }}>
+        <div style={{ height: '100%', backgroundColor: 'var(--color-accent)', animation: 'progress 0.5s ease-out forwards' }} />
+        <style>{`@keyframes progress { 0% { width: 0%; } 100% { width: 100%; } }`}</style>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -37,22 +60,27 @@ export default function App() {
         toastOptions={{
           duration: 4000,
           style: {
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'var(--font-sans)',
             fontSize: '0.88rem',
-            background: 'rgba(8, 15, 40, 0.95)',
-            color: '#f0f6ff',
-            border: '1px solid rgba(14,165,233,0.3)',
-            borderRadius: '0.875rem',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 0 30px rgba(14,165,233,0.12), 0 10px 40px rgba(0,0,0,0.5)',
+            background: 'var(--color-bg)',
+            color: 'var(--color-primary)',
+            border: '1px solid var(--color-primary)',
+            borderRadius: '0',
+            boxShadow: 'none',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            fontWeight: 600
           },
-          success: { iconTheme: { primary: '#06d6a0', secondary: 'rgba(6,214,160,0.1)' } },
-          error:   { iconTheme: { primary: '#f87171', secondary: 'rgba(239,68,68,0.1)'  } },
+          success: { iconTheme: { primary: 'var(--color-primary)', secondary: 'var(--color-bg)' } },
+          error:   { iconTheme: { primary: 'var(--color-accent)', secondary: 'var(--color-bg)'  } },
         }}
       />
+      <RouteChangeLoader />
       <Routes>
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/manifesto" element={<ManifestoPage />} />
+        <Route path="/system" element={<SystemPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 

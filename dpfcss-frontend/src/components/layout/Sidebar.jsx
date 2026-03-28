@@ -1,31 +1,26 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-    LayoutDashboard, Calendar, Pill, MessageCircle, Settings,
-    LogOut, Users, Activity, FileText, Bell, Menu, X, Heart
-} from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useNotificationStore from '../../store/notificationStore';
 
 const patientLinks = [
-    { to: '/patient', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/patient/messages', icon: MessageCircle, label: 'Messages' },
-    { to: '/patient/settings', icon: Settings, label: 'Settings' },
+    { to: '/patient', label: 'Dashboard' },
+    { to: '/patient/messages', label: 'Messages' },
+    { to: '/patient/settings', label: 'Settings' },
 ];
 
 const providerLinks = [
-    { to: '/provider', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/provider/patients', icon: Users, label: 'Patients' },
-    { to: '/provider/appointments', icon: Calendar, label: 'Appointments' },
-    { to: '/provider/messages', icon: MessageCircle, label: 'Messages' },
-    { to: '/provider/settings', icon: Settings, label: 'Settings' },
+    { to: '/provider', label: 'Dashboard' },
+    { to: '/provider/patients', label: 'Patients' },
+    { to: '/provider/appointments', label: 'Appointments' },
+    { to: '/provider/messages', label: 'Messages' },
+    { to: '/provider/settings', label: 'Settings' },
 ];
 
 const adminLinks = [
-    { to: '/admin', icon: Activity, label: 'Overview' },
-    { to: '/admin/users', icon: Users, label: 'Users' },
-    { to: '/admin/content', icon: FileText, label: 'Content' },
+    { to: '/admin', label: 'Overview' },
+    { to: '/admin/users', label: 'Users' },
+    { to: '/admin/content', label: 'Content' },
 ];
 
 export default function Sidebar() {
@@ -44,71 +39,61 @@ export default function Sidebar() {
         navigate('/login');
     };
 
-    const roleColor = user?.role === 'patient' ? 'bg-teal-100 text-teal-700'
-        : user?.role === 'provider' ? 'bg-blue-100 text-blue-700'
-            : 'bg-purple-100 text-purple-700';
-
     return (
         <>
-            {/* Mobile hamburger */}
-            <button
-                className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-xl bg-white shadow-md border border-[var(--color-border)]"
-                onClick={() => setMobileOpen(true)}
-            >
-                <Menu size={20} />
+            <style>{`
+                .mobile-menu-btn {
+                    display: none;
+                    position: fixed;
+                    top: 1rem;
+                    left: 1rem;
+                    z-index: 50;
+                    background-color: var(--color-primary);
+                    color: var(--color-bg);
+                    border: none;
+                    padding: 0.5rem 1rem;
+                    border-radius: var(--radius-sm);
+                    font-size: 0.75rem;
+                    letter-spacing: 0.05em;
+                    text-transform: uppercase;
+                }
+                @media (max-width: 768px) {
+                    .mobile-menu-btn { display: block; }
+                }
+            `}</style>
+            
+            <button className="mobile-menu-btn" onClick={() => setMobileOpen(true)}>
+                MENU
             </button>
 
             {/* Overlay */}
-            <AnimatePresence>
-                {mobileOpen && (
-                    <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/30 z-40 md:hidden"
-                        onClick={() => setMobileOpen(false)}
-                    />
-                )}
-            </AnimatePresence>
+            {mobileOpen && (
+                <div 
+                    style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(27, 58, 45, 0.4)', zIndex: 40 }}
+                    onClick={() => setMobileOpen(false)}
+                />
+            )}
 
             {/* Sidebar */}
             <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
-                {/* Logo */}
-                <div className="p-6 flex items-center justify-between border-b border-[var(--color-border)]">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-600 to-teal-500 flex items-center justify-center">
-                            <Heart size={18} className="text-white" />
-                        </div>
-                        <div>
-                            <span className="font-bold text-[15px] text-[var(--color-text-primary)]">DPFCSS</span>
-                            <p className="text-[10px] text-[var(--color-text-secondary)] leading-none">Healthcare Platform</p>
-                        </div>
-                    </div>
-                    <button className="md:hidden" onClick={() => setMobileOpen(false)}>
-                        <X size={18} />
-                    </button>
+                <div style={{ padding: '0 2.5rem 3.5rem 2.5rem' }}>
+                    <h1 className="editorial-heading" style={{ fontSize: '1.85rem', color: 'var(--color-bg)' }}>DPFCSS.</h1>
+                    <p style={{ fontSize: '0.7rem', opacity: 0.6, letterSpacing: '0.05em', color: 'var(--color-bg)', marginTop: '0.2rem' }}>Architecture of Care</p>
                 </div>
 
-                {/* User info */}
-                <div className="px-4 py-4 border-b border-[var(--color-border)]">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-teal-400 flex items-center justify-center text-white font-bold text-sm">
-                            {user?.name?.charAt(0)?.toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                            <p className="font-semibold text-sm text-[var(--color-text-primary)] truncate">{user?.name}</p>
-                            <span className={`badge text-[10px] ${roleColor}`}>
-                                {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Navigation */}
-                <nav className="flex-1 py-4 overflow-y-auto">
-                    <p className="px-5 mb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text-secondary)]">
-                        Navigation
+                <div style={{ padding: '0 2.5rem 2.5rem 2.5rem' }}>
+                    <p style={{ fontSize: '0.95rem', color: 'var(--color-bg)', fontWeight: 600 }}>{user?.name}</p>
+                    <p style={{ fontSize: '0.7rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-bg)', marginTop: '0.2rem' }}>
+                        {user?.role}
                     </p>
-                    <ul className="space-y-1">
-                        {links.map(({ to, icon: Icon, label }) => (
+                </div>
+
+                <nav style={{ flex: 1, overflowY: 'auto', marginBottom: '2rem' }}>
+                    <p style={{ padding: '0 2.5rem 1rem 2.5rem', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.5, color: 'var(--color-bg)', fontWeight: 600 }}>
+                        Menu
+                    </p>
+                    <ul style={{ listStyle: 'none' }}>
+                        {links.map(({ to, label }) => (
                             <li key={to}>
                                 <NavLink
                                     to={to}
@@ -116,10 +101,11 @@ export default function Sidebar() {
                                     className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                                     onClick={() => setMobileOpen(false)}
                                 >
-                                    <Icon size={18} />
-                                    <span>{label}</span>
+                                    {label}
                                     {label === 'Messages' && unreadCount > 0 && (
-                                        <span className="ml-auto badge badge-blue text-[10px]">{unreadCount}</span>
+                                        <span style={{ marginLeft: '0.75rem', fontSize: '0.7rem', backgroundColor: 'var(--color-accent)', padding: '0.1rem 0.4rem', borderRadius: '1rem', color: 'var(--color-bg)' }}>
+                                            {unreadCount}
+                                        </span>
                                     )}
                                 </NavLink>
                             </li>
@@ -127,14 +113,14 @@ export default function Sidebar() {
                     </ul>
                 </nav>
 
-                {/* Logout */}
-                <div className="p-4 border-t border-[var(--color-border)]">
+                <div style={{ padding: '0 2.5rem' }}>
                     <button
                         onClick={handleLogout}
-                        className="sidebar-link w-full text-red-500 hover:!text-red-600 hover:!bg-red-50"
+                        style={{ background: 'transparent', border: 'none', color: 'var(--color-accent)', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', padding: '0.5rem 0', transition: 'color var(--transition-fast)' }}
+                        onMouseEnter={(e) => e.target.style.color = 'var(--color-bg)'}
+                        onMouseLeave={(e) => e.target.style.color = 'var(--color-accent)'}
                     >
-                        <LogOut size={18} />
-                        <span>Sign Out</span>
+                        Sign Out
                     </button>
                 </div>
             </aside>

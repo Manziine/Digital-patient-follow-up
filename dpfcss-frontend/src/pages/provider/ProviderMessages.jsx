@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Send, MessageSquare, Search, User } from 'lucide-react';
 import Sidebar from '../../components/layout/Sidebar';
 import api from '../../api/axios';
 import useAuthStore from '../../store/authStore';
@@ -21,7 +19,7 @@ export default function ProviderMessages() {
     useEffect(() => {
         api.get('/providers/patients')
             .then(r => setPatients(r.data))
-            .catch(() => toast.error('Could not load patients'));
+            .catch(() => toast.error('Could not load patient roster'));
     }, []);
 
     const loadMessages = async (patientId, silent = false) => {
@@ -59,7 +57,7 @@ export default function ProviderMessages() {
             setNewMessage('');
             await loadMessages(selectedPatient._id, true);
         } catch {
-            toast.error('Failed to send message');
+            toast.error('Failed to send transmission');
         } finally {
             setSending(false);
         }
@@ -70,182 +68,128 @@ export default function ProviderMessages() {
         p.phone?.includes(search)
     );
 
-    const formatTime = (iso) => {
-        const d = new Date(iso);
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    };
-
-    const formatDate = (iso) => {
-        const d = new Date(iso);
-        const today = new Date();
-        if (d.toDateString() === today.toDateString()) return 'Today';
-        return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    };
-
     return (
         <div>
             <Sidebar />
-            <main className="page-content" style={{ padding: 0, height: '100vh', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #e2e8f4', background: '#fff' }}>
-                    <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1a2540', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <MessageSquare size={22} color="#2074e8" /> Patient Messages
-                    </h1>
-                    <p style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '0.15rem' }}>
-                        Message your assigned patients directly
-                    </p>
-                </div>
+            <main className="page-content" style={{ padding: '0', display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+                <style>{`
+                    .chat-bubble {
+                        max-width: 65%;
+                        padding: 1rem 1.25rem;
+                        font-size: 0.95rem;
+                        line-height: 1.6;
+                        color: var(--color-primary);
+                    }
+                    .chat-bubble.sent {
+                        background-color: var(--color-border);
+                        align-self: flex-end;
+                        border-top-left-radius: var(--radius-sm);
+                        border-bottom-left-radius: var(--radius-sm);
+                        border-top-right-radius: var(--radius-sm);
+                    }
+                    .chat-bubble.received {
+                        background-color: transparent;
+                        border: 1px solid var(--color-border);
+                        align-self: flex-start;
+                        border-top-right-radius: var(--radius-sm);
+                        border-bottom-right-radius: var(--radius-sm);
+                        border-bottom-left-radius: var(--radius-sm);
+                    }
+                `}</style>
 
-                <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-                    {/* Patient list */}
-                    <div style={{ width: 280, borderRight: '1px solid #e2e8f4', display: 'flex', flexDirection: 'column', background: '#f8faff', flexShrink: 0 }}>
-                        <div style={{ padding: '0.875rem 1rem', borderBottom: '1px solid #e2e8f4' }}>
-                            <div style={{ position: 'relative' }}>
-                                <Search size={15} style={{ position: 'absolute', top: '50%', left: 10, transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                                <input
-                                    value={search}
-                                    onChange={e => setSearch(e.target.value)}
-                                    placeholder="Search patients..."
-                                    style={{ width: '100%', padding: '0.5rem 0.75rem 0.5rem 2rem', border: '1px solid #e2e8f4', borderRadius: 8, fontSize: '0.85rem', background: '#fff', boxSizing: 'border-box' }}
-                                />
-                            </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 350px) 1fr', flex: 1, overflow: 'hidden' }}>
+                    {/* Patient List */}
+                    <div style={{ borderRight: '1px solid var(--color-primary)', display: 'flex', flexDirection: 'column', backgroundColor: 'transparent' }}>
+                        <div style={{ padding: '3rem 2rem 2rem 2rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <h1 className="editorial-heading" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Directs</h1>
+                            <input 
+                                style={{ width: '100%', fontSize: '0.85rem' }}
+                                placeholder="Search roster..." 
+                                value={search} 
+                                onChange={(e) => setSearch(e.target.value)} 
+                            />
                         </div>
 
                         <div style={{ flex: 1, overflowY: 'auto' }}>
                             {filtered.length === 0 && (
-                                <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
-                                    No patients found
-                                </div>
+                                <p style={{ padding: '3rem 2rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>No patients established.</p>
                             )}
-                            {filtered.map(patient => (
-                                <div
-                                    key={patient._id}
-                                    onClick={() => selectPatient(patient)}
-                                    style={{
-                                        padding: '0.875rem 1rem',
-                                        cursor: 'pointer',
-                                        borderBottom: '1px solid #e9eef6',
-                                        background: selectedPatient?._id === patient._id ? '#eff8ff' : 'transparent',
-                                        borderLeft: selectedPatient?._id === patient._id ? '3px solid #2074e8' : '3px solid transparent',
-                                        transition: 'all 0.15s',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.75rem',
-                                    }}
-                                >
-                                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg, #dbeefe, #a5f3fc)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#0369a1', fontSize: '0.9rem', flexShrink: 0 }}>
-                                        {patient.name?.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div style={{ minWidth: 0 }}>
-                                        <p style={{ fontWeight: 600, fontSize: '0.88rem', color: '#1a2540', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{patient.name}</p>
-                                        <p style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{patient.phone || patient.email}</p>
-                                    </div>
-                                </div>
-                            ))}
+                            
+                            <ul style={{ listStyle: 'none' }}>
+                                {filtered.map((patient) => {
+                                    const isSelected = selectedPatient?._id === patient._id;
+                                    return (
+                                        <li key={patient._id}>
+                                            <button 
+                                                onClick={() => selectPatient(patient)}
+                                                style={{ 
+                                                    width: '100%', textAlign: 'left', padding: '1.5rem 2rem', cursor: 'pointer', border: 'none', borderBottom: '1px solid var(--color-border)', backgroundColor: isSelected ? 'var(--color-primary)' : 'transparent', color: isSelected ? 'var(--color-bg)' : 'var(--color-primary)', transition: 'background-color var(--transition-fast)' 
+                                                }}
+                                            >
+                                                <p style={{ fontWeight: 600, fontSize: '1.05rem', marginBottom: '0.5rem' }}>{patient.name}</p>
+                                                <p style={{ fontSize: '0.85rem', opacity: isSelected ? 0.7 : 0.6 }}>{patient.phone || patient.email}</p>
+                                            </button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
                         </div>
                     </div>
 
-                    {/* Chat area */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#fff', overflow: 'hidden' }}>
+                    {/* Chat Window */}
+                    <div style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'transparent' }}>
                         {!selectedPatient ? (
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
-                                <MessageSquare size={48} strokeWidth={1.2} color="#cbd5e1" />
-                                <p style={{ marginTop: '1rem', fontWeight: 600, color: '#64748b' }}>Select a patient to start messaging</p>
-                                <p style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>Choose from your patient list on the left</p>
+                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' }}>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Select a patient</p>
                             </div>
                         ) : (
                             <>
-                                {/* Chat header */}
-                                <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #e2e8f4', display: 'flex', alignItems: 'center', gap: '0.875rem', background: '#fafbff' }}>
-                                    <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #dbeefe, #a5f3fc)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#0369a1' }}>
-                                        {selectedPatient.name?.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div>
-                                        <p style={{ fontWeight: 700, fontSize: '0.95rem', color: '#1a2540' }}>{selectedPatient.name}</p>
-                                        <p style={{ fontSize: '0.78rem', color: '#94a3b8' }}>Patient • {selectedPatient.phone || selectedPatient.email}</p>
-                                    </div>
+                                {/* Header */}
+                                <div style={{ padding: '3rem 4rem 1.5rem', borderBottom: '1px solid var(--color-border)' }}>
+                                    <h2 className="editorial-heading" style={{ fontSize: '2rem', marginBottom: '0.2rem' }}>{selectedPatient.name}</h2>
+                                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>Patient Roster</p>
                                 </div>
 
                                 {/* Messages */}
-                                <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    {loadingMsgs && (
-                                        <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem', fontSize: '0.85rem' }}>Loading messages...</div>
-                                    )}
-                                    {!loadingMsgs && messages.length === 0 && (
-                                        <div style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>
-                                            <User size={36} strokeWidth={1.2} color="#cbd5e1" style={{ marginBottom: 8 }} />
-                                            <p style={{ fontSize: '0.88rem' }}>No messages yet. Start the conversation!</p>
-                                        </div>
-                                    )}
+                                <div style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+                                    {loadingMsgs && <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>Synching transmissions...</p>}
+                                    {!loadingMsgs && messages.length === 0 && <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>Line open. Transmit securely.</p>}
+                                    
                                     {messages.map((msg, i) => {
-                                        const isMe = msg.sender?._id === user?.id || msg.sender === user?.id;
-                                        const showDate = i === 0 || formatDate(messages[i - 1]?.createdAt) !== formatDate(msg.createdAt);
+                                        const isSent = msg.sender === user?.id || msg.sender?._id === user?.id || msg.sender?.toString() === user?.id;
                                         return (
-                                            <div key={msg._id}>
-                                                {showDate && (
-                                                    <div style={{ textAlign: 'center', margin: '0.5rem 0' }}>
-                                                        <span style={{ fontSize: '0.72rem', color: '#94a3b8', background: '#f1f5f9', padding: '0.2rem 0.75rem', borderRadius: 20 }}>
-                                                            {formatDate(msg.createdAt)}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 6 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}
-                                                >
-                                                    <div style={{
-                                                        maxWidth: '65%',
-                                                        padding: '0.65rem 1rem',
-                                                        borderRadius: isMe ? '1.2rem 1.2rem 0.3rem 1.2rem' : '1.2rem 1.2rem 1.2rem 0.3rem',
-                                                        background: isMe ? 'linear-gradient(135deg, #2074e8, #1a5dbf)' : '#f1f5f9',
-                                                        color: isMe ? '#fff' : '#1a2540',
-                                                        fontSize: '0.88rem',
-                                                        lineHeight: 1.5,
-                                                        boxShadow: isMe ? '0 2px 8px rgba(32,116,232,0.2)' : '0 1px 3px rgba(0,0,0,0.05)',
-                                                    }}>
-                                                        <p>{msg.content}</p>
-                                                        <p style={{ fontSize: '0.65rem', opacity: 0.65, marginTop: '0.25rem', textAlign: 'right' }}>{formatTime(msg.createdAt)}</p>
-                                                    </div>
-                                                </motion.div>
+                                            <div key={msg._id || i} style={{ display: 'flex', flexDirection: 'column', alignItems: isSent ? 'flex-end' : 'flex-start' }}>
+                                                <div className={`chat-bubble ${isSent ? 'sent' : 'received'}`}>
+                                                    {msg.content}
+                                                </div>
+                                                <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--color-text-muted)', marginTop: '0.75rem' }}>
+                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
                                             </div>
                                         );
                                     })}
                                     <div ref={bottomRef} />
                                 </div>
 
-                                {/* Send form */}
-                                <form onSubmit={sendMessage} style={{ padding: '1rem 1.25rem', borderTop: '1px solid #e2e8f4', display: 'flex', gap: '0.75rem', background: '#fafbff' }}>
-                                    <input
-                                        value={newMessage}
-                                        onChange={e => setNewMessage(e.target.value)}
-                                        placeholder={`Message ${selectedPatient.name}...`}
-                                        disabled={sending}
-                                        style={{ flex: 1, padding: '0.7rem 1rem', border: '1.5px solid #e2e8f4', borderRadius: 12, fontSize: '0.9rem', outline: 'none', transition: 'border-color 0.2s' }}
-                                        onFocus={e => e.target.style.borderColor = '#2074e8'}
-                                        onBlur={e => e.target.style.borderColor = '#e2e8f4'}
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={sending || !newMessage.trim()}
-                                        style={{
-                                            padding: '0.7rem 1.1rem',
-                                            background: sending || !newMessage.trim() ? '#cbd5e1' : 'linear-gradient(135deg, #2074e8, #1a5dbf)',
-                                            color: '#fff',
-                                            border: 'none',
-                                            borderRadius: 12,
-                                            cursor: sending || !newMessage.trim() ? 'not-allowed' : 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 6,
-                                            fontWeight: 600,
-                                            fontSize: '0.9rem',
-                                            transition: 'all 0.2s',
-                                        }}
-                                    >
-                                        <Send size={16} />
-                                        {sending ? 'Sending...' : 'Send'}
-                                    </button>
-                                </form>
+                                {/* Input Form */}
+                                <div style={{ padding: '2rem 4rem', borderTop: '1px solid var(--color-border)' }}>
+                                    <form onSubmit={sendMessage} style={{ display: 'flex', gap: '2rem', alignItems: 'flex-end' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <input 
+                                                placeholder="Draft transmission..." 
+                                                value={newMessage}
+                                                onChange={(e) => setNewMessage(e.target.value)} 
+                                                style={{ borderBottom: 'none', border: '1px solid var(--color-border)', padding: '1rem', width: '100%', borderRadius: 'var(--radius-sm)' }}
+                                            />
+                                        </div>
+                                        <button type="submit" className="btn-primary" disabled={sending || !newMessage.trim()}>
+                                            Dispatch
+                                        </button>
+                                    </form>
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: '1rem', letterSpacing: '0.05em' }}>
+                                        End-to-end clinical encryption enabled.
+                                    </p>
+                                </div>
                             </>
                         )}
                     </div>

@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPFCSS — Architecture of Care</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #F2EDE4;
+            --primary: #1B3A2D;
+            --accent: #C4622D;
+            --muted: rgba(27, 58, 45, 0.6);
+            --border: rgba(27, 58, 45, 0.15);
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--primary);
+            font-family: var(--font-sans);
+            font-weight: 400;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .serif { font-family: var(--font-serif); }
+        .small-caps { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+        .muted { color: var(--muted); }
+        .accent { color: var(--accent); }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .nav-link:hover { border-bottom: 1px solid var(--primary); }
+        
+        .action-link {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            border-bottom: 1px solid var(--primary);
+            padding-bottom: 2px;
+            display: inline-block;
+        }
+
+        .btn {
+            display: inline-block;
+            background: none;
+            border: none;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-solid {
+            background-color: var(--primary);
+            color: var(--bg);
+            padding: 1.25rem 2rem;
+            width: 100%;
+            text-align: center;
+            border: 1px solid var(--primary);
+            transition: background-color 0.2s;
+        }
+
+        .btn-solid:hover { background-color: transparent; color: var(--primary); }
+
+        .btn-outline {
+            border-bottom: 1px solid var(--primary);
+            padding-bottom: 4px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--primary);
+            color: var(--primary);
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            padding: 0.75rem 0;
+            outline: none;
+            border-radius: 0;
+        }
+
+        input:focus, select:focus, textarea:focus { border-bottom: 2px solid var(--accent); }
+
+        /* Navigation */
+        .top-nav {
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background-color: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .top-nav .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .top-nav .links {
+            display: flex;
+            gap: 3rem;
+        }
+
+        /* Routing */
+        .page { display: none; flex: 1; animation: fadeIn 0.4s ease-out; }
+        .page.active { display: flex; flex-direction: column; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Generic Layouts */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 4rem;
+        }
+
+        /* Views */
+        /* 1. HOME */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 80vh;
+        }
+        .hero-left {
+            padding: 6rem 4rem 6rem 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+        .hero-left::after {
+            content: ''; position: absolute; top: 0; bottom: 0; right: 0;
+            width: 1px; background-color: var(--border);
+        }
+        .hero-title {
+            font-size: clamp(4rem, 6vw, 6.5rem);
+            line-height: 1;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+        .hero-right {
+            padding: 6rem 0 6rem 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-image: linear-gradient(rgba(27, 58, 45, 0.8), rgba(27, 58, 45, 0.9)), url('https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=1400&q=80');
+            background-size: cover;
+            background-position: center;
+            color: var(--bg);
+        }
+        .capabilities-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            max-width: 400px;
+        }
+        .capabilities-list h3 { font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 400; }
+        .capabilities-list p { font-size: 0.9rem; opacity: 0.8; }
+        .hero-quote {
+            padding: 8rem 4rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+        .hero-quote blockquote {
+            font-size: 2.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.3;
+            font-weight: 300;
+            color: var(--accent);
+        }
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            padding: 4rem;
+        }
+
+        /* 2. MANIFESTO */
+        .manifesto-page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 6rem 0;
+        }
+        .manifesto-page h1 { font-size: 4rem; font-weight: 300; margin-bottom: 4rem; line-height: 1.1; }
+        .drop-cap::first-letter {
+            float: left; font-size: 5rem; line-height: 0.8; padding-right: 0.5rem; color: var(--accent);
+            font-family: var(--font-serif);
+        }
+        .manifesto-page p { font-size: 1.15rem; margin-bottom: 2rem; line-height: 1.8; }
+        .pull-quote {
+            float: right; width: 40%; margin: 1rem -10% 2rem 3rem;
+            font-size: 1.8rem; line-height: 1.3; color: var(--accent);
+            font-family: var(--font-serif); font-style: italic;
+        }
+        .manifesto-img {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 60vh;
+            object-fit: cover;
+            margin: 4rem 0;
+        }
+
+        /* 3. SIGN IN */
+        .split-screen {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: calc(100vh - 85px);
+        }
+        .split-image {
+            background-image: url('https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=1400&q=80');
+            background-size: cover;
+            background-position: center;
+            filter: grayscale(20%) contrast(1.1);
+        }
+        .split-form {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 6rem;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* 4. DASHBOARD */
+        .dash-header {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding: 4rem 0 2rem; border-bottom: 1px solid var(--border);
+        }
+        .dash-stats {
+            display: flex; flex-direction: column; gap: 0.5rem; padding: 2rem 0;
+            border-bottom: 1px solid var(--border); font-size: 1.1rem;
+        }
+        .dash-main {
+            display: grid; grid-template-columns: 1fr 350px; gap: 4rem; padding: 4rem 0;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 1rem 0; color: var(--muted); border-bottom: 1px solid var(--border); }
+        td { padding: 1.25rem 0; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+        .sidebar-list { list-style: none; display: flex; flex-direction: column; gap: 1.5rem; }
+        .sidebar-list li { display: grid; grid-template-columns: 60px 1fr; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
+
+        /* 5. PATIENT PROFILE */
+        .profile-header {
+            padding: 4rem 0 3rem; border-bottom: 1px solid var(--border);
+            display: grid; grid-template-columns: 1fr auto; alignItems: end; gap: 2rem;
+        }
+        .profile-grid { display: grid; grid-template-columns: 1fr 350px; gap: 6rem; padding: 4rem 0; }
+        .timeline { position: relative; padding-left: 2rem; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 4rem; }
+        .timeline-item { position: relative; }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -2.3rem; top: 0.4rem;
+            width: 10px; height: 10px; background: var(--bg); border: 1px solid var(--primary); border-radius: 50%;
+        }
+        .rx-box { border: 1px solid var(--primary); padding: 2rem; margin-bottom: 2rem; }
+
+        /* MEDIA QUERIES */
+        @media (max-width: 1024px) {
+            .hero, .dash-main, .profile-grid { grid-template-columns: 1fr; }
+            .hero-left, .hero-right { padding: 4rem; }
+            .hero-left::after { display: none; }
+            .split-screen { grid-template-columns: 1fr; }
+            .split-image { height: 30vh; }
+        }
+        @media (max-width: 768px) {
+            .container { padding: 0 2rem; }
+            .top-nav { padding: 1.5rem 2rem; flex-direction: column; gap: 1.5rem; }
+            .hero-title { font-size: 3rem; }
+            .hero-stats { flex-direction: column; gap: 1rem; text-align: center; }
+            table, thead, tbody, th, td, tr { display: block; }
+            tr { padding: 1rem 0; border-bottom: 1px solid var(--primary); }
+            th { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="top-nav">
+        <div class="logo serif">DPFCSS.</div>
+        <div class="links small-caps">
+            <a onclick="navigate('home')" class="nav-link">Home</a>
+            <a onclick="navigate('manifesto')" class="nav-link">Manifesto</a>
+            <a onclick="navigate('dashboard')" class="nav-link">System</a>
+            <a onclick="navigate('signin')" class="action-link" style="color: var(--accent); border-color: var(--accent)">Sign In</a>
+        </div>
+    </nav>
+
+    <!-- 1. HOME PAGE -->
+    <div id="page-home" class="page active">
+        <div class="hero">
+            <div class="hero-left">
+                <div style="padding-left: 4rem">
+                    <h1 class="hero-title serif">Precision in<br>patient<br>continuity.</h1>
+                    <p style="font-size: 1.1rem; max-width: 400px; color: var(--muted); margin-bottom: 3rem;">
+                        A digital infrastructure replacing scattered interactions with highly orchestrated, human-centered follow-up care for Rwanda's clinical ecosystem.
+                    </p>
+                    <button class="btn btn-outline" onclick="navigate('manifesto')" style="border-width: 1px;">Read the Manifesto</button>
+                </div>
+            </div>
+            <div class="hero-right">
+                <p class="small-caps" style="color: var(--accent); margin-bottom: 3rem; opacity: 1;">Key Capabilities</p>
+                <ul class="capabilities-list">
+                    <li>
+                        <h3 class="serif">01. Asymmetric Communication</h3>
+                        <p>Secure, non-intrusive messaging protocols between patient and provider.</p>
+                    </li>
+                    <li>
+                        <h3 class="serif">02. Medical Timelines</h3>
+                        <p>Chronological health mapping replacing scattered clinical notes.</p>
+                    </li>
+                    <li>
+                        <h3 class="serif">03. Prescription Tracking</h3>
+                        <p>Clear, readable medication adherence logging.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <section class="hero-quote">
+            <blockquote class="serif">
+                "We are moving from treating episodes of illness to sustaining a continuum of health. The architecture of care must follow."
+            </blockquote>
+            <p class="small-caps" style="margin-top: 2rem;">— Dr. E. Nyirasafari, Kigali</p>
+        </section>
+
+        <section class="hero-stats small-caps">
+            <span>2,400+ patients tracked</span>
+            <span>·</span>
+            <span>18 clinics integrated</span>
+            <span>·</span>
+            <span>94% follow-up rate</span>
+        </section>
+    </div>
+
+    <!-- 2. MANIFESTO PAGE -->
+    <div id="page-manifesto" class="page container">
+        <div class="manifesto-page">
+            <h1 class="serif">The Architecture of Continuous Care</h1>
+            <p class="small-caps muted" style="margin-bottom: 4rem;">Published October 12, 2026</p>
+            
+            <p class="drop-cap">
+                For decades, the standard of clinical engagement in Rwanda—and much of the world—has been episodic. A patient presents with acute symptoms, a diagnosis is rendered, a prescription is written, and the patient departs. What occurs between that departure and the next visit is a void of clinical visibility.
+            </p>
+            
+            <p>
+                This void is where chronic conditions silently escalate, where medication adherence falters without intervention, and where the true cost of fragmented care is exacted. The reliance on scattered physical notes and disconnected memory serves only the disease, not the patient.
+            </p>
+
+            <div class="pull-quote">
+                "The reliance on scattered notes serves only the disease, not the patient."
+            </div>
+
+            <p>
+                DPFCSS was conceived not merely as software, but as a philosophical shift in clinical architecture. We reject the generic, data-heavy dashboards that treat humans as metrics. Instead, we embrace a system that models the ideal physician-patient relationship: quiet, strictly private, highly structured, and always continuous.
+            </p>
+
+            <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=1400&q=80" alt="Clinical Environment" class="manifesto-img">
+
+            <p>
+                By establishing clear medical timelines and asymmetric communication channels, we allow providers to maintain oversight without the noise of traditional EHR systems. It is an infrastructure built specifically for the realities of modern Rwandan healthcare—functioning seamlessly across varied bandwidths while upholding the dignity of the patient experience.
+            </p>
+            
+            <p style="margin-top: 4rem; text-align: center;">
+                <button class="btn btn-outline" onclick="navigate('signin')">Join the Directory</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- 3. SIGN IN PAGE -->
+    <div id="page-signin" class="page">
+        <div class="split-screen">
+            <div class="split-image"></div>
+            <div class="split-form">
+                <h1 class="serif" style="font-size: 3.5rem; margin-bottom: 0.5rem; line-height: 1.1;">Secure Access</h1>
+                <p class="muted" style="margin-bottom: 4rem;">Provide your clinical credentials.</p>
+
+                <form onsubmit="event.preventDefault(); navigate('dashboard');">
+                    <div style="margin-bottom: 2rem;">
+                        <label class="small-caps muted" style="display: block; margin-bottom: 0.5rem;">Identity / Email</label>
+                        <input type="email" value="dr.uwase@kfh.rw" required>
+                    </div>
+                    <div style="margin-bottom: 3rem;">
+                        <label class="small-caps muted" style="display: block; margin-bottom: 0.5rem;">Passkey</label>
+                        <input type="password" value="password123" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-solid">Sign In</button>
+                </form>
+
+                <div style="margin-top: 4rem; text-align: center;">
+                    <a class="action-link" style="font-size: 0.75rem; border-color: var(--muted); color: var(--muted)">Request Access</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. DASHBOARD -->
+    <div id="page-dashboard" class="page container">
+        <div class="dash-header">
+            <h1 class="serif" style="font-size: 3rem; font-weight: 300;">Good morning, Dr. Uwase</h1>
+            <p class="small-caps" id="current-date">October 14, 2026</p>
+        </div>
+
+        <div class="dash-stats serif">
+            <p>14 patients due for follow-up today.</p>
+            <p>3 prescriptions expiring this week.</p>
+            <p>2 unread clinical notes.</p>
+        </div>
+
+        <div class="dash-main">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem;">
+                    <h2 class="serif" style="font-size: 2rem; font-weight: 300;">Recent Follow-ups</h2>
+                    <a onclick="navigate('appointments')" class="action-link">View Registry</a>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr class="small-caps">
+                            <th>Patient Name</th>
+                            <th>Condition</th>
+                            <th>Last Visit</th>
+                            <th>Next Due</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="cursor: pointer" onclick="navigate('profile')">
+                            <td style="font-weight: 600;">Habimana, Jean-Paul</td>
+                            <td>Hypertension</td>
+                            <td class="muted">Oct 02</td>
+                            <td>Oct 14</td>
+                            <td class="accent small-caps" style="font-weight: 700;">Overdue</td>
+                        </tr>
+                        <tr style="cursor: pointer" onclick="navigate('profile')">
+                            <td style="font-weight: 600;">Mukamana, Claudine</td>
+                            <td>Post-Op Knee</td>
+                            <td class="muted">Oct 10</td>
+                            <td>Nov 10</td>
+                            <td class="small-caps" style="color: #4d7c0f; font-weight: 700;">On Track</td>
+                        </tr>
+                        <tr style="cursor: pointer" onclick="navigate('profile')">
+                            <td style="font-weight: 600;">Kwizera, Emmanuel</td>
+                            <td>Type II Diabetes</td>
+                            <td class="muted">Sep 15</td>
+                            <td>Oct 15</td>
+                            <td class="muted small-caps" style="font-weight: 700;">Pending</td>
+                        </tr>
+                        <tr style="cursor: pointer" onclick="navigate('profile')">
+                            <td style="font-weight: 600;">Uwimana, Solange</td>
+                            <td>Prenatal Check</td>
+                            <td class="muted">Oct 05</td>
+                            <td>Nov 05</td>
+                            <td class="small-caps" style="color: #4d7c0f; font-weight: 700;">On Track</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                    <h2 class="serif" style="font-size: 1.5rem; font-weight: 300;">Today's Schedule</h2>
+                    <a onclick="navigate('form')" class="btn" style="color: var(--accent);">+ Add</a>
+                </div>
+                
+                <ul class="sidebar-list">
+                    <li>
+                        <span class="serif" style="font-size: 1.25rem; color: var(--accent)">09:00</span>
+                        <div>
+                            <p style="font-weight: 600;">Habimana, Jean-Paul</p>
+                            <p class="muted" style="font-size: 0.85rem">Post-op review</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="serif" style="font-size: 1.25rem;">11:30</span>
+                        <div>
+                            <p style="font-weight: 600;">Mukamana, Claudine</p>
+                            <p class="muted" style="font-size: 0.85rem">Hypertension check</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="serif" style="font-size: 1.25rem;">14:15</span>
+                        <div>
+                            <p style="font-weight: 600;">Ndayisaba, Fabrice</p>
+                            <p class="muted" style="font-size: 0.85rem">Medication adjustment</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. PATIENT PROFILE -->
+    <div id="page-profile" class="page container">
+        <div class="profile-header">
+            <div>
+                <a onclick="navigate('dashboard')" class="action-link" style="margin-bottom: 2rem; border-color: var(--muted); color: var(--muted)">← Back</a>
+                <h1 class="serif" style="font-size: 4rem; font-weight: 300; line-height: 1.1; margin-bottom: 1rem;">Habimana, Jean-Paul</h1>
+                <p class="small-caps muted">56 YRS · O+ · King Faisal Hospital · Dr. Uwase (Primary)</p>
+            </div>
+            <img src="https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?w=400&q=80" alt="Patient Context" style="width: 140px; height: 180px; object-fit: cover; filter: grayscale(100%) contrast(1.2);">
+        </div>
+
+        <div class="profile-grid">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3rem;">
+                    <h2 class="serif" style="font-size: 2rem; font-weight: 300;">Medical Timeline</h2>
+                    <a onclick="navigate('form')" class="action-link" style="color: var(--accent); border-color: var(--accent)">Log Interaction</a>
+                </div>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <p class="small-caps accent" style="margin-bottom: 0.5rem;">Oct 02, 2026</p>
+                        <h3 class="serif" style="font-size: 1.5rem; margin-bottom: 1rem;">Cardiology Consultation</h3>
+                        <p style="color: var(--muted); margin-bottom: 1.5rem; max-width: 600px;">Patient reported mild shortness of breath during evening walks. Blood pressure measured at 135/85. Adjusted Losartan dosage and recommended dietary modifications.</p>
+                        <a class="action-link text-btn">View Full Record</a>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <p class="small-caps muted" style="margin-bottom: 0.5rem;">Sep 14, 2026</p>
+                        <h3 class="serif" style="font-size: 1.5rem; margin-bottom: 1rem;">Routine Lab Work</h3>
+                        <p style="color: var(--muted); margin-bottom: 1.5rem; max-width: 600px;">Cholesterol panels indicate a 10% reduction in LDL. Kidney function normal. Awaiting HbA1c results from central lab.</p>
+                        <a class="action-link">View Full Record</a>
+                    </div>
+
+                    <div class="timeline-item">
+                        <p class="small-caps muted" style="margin-bottom: 0.5rem;">Aug 01, 2026</p>
+                        <h3 class="serif" style="font-size: 1.5rem; margin-bottom: 1rem;">Initial Diagnosis</h3>
+                        <p style="color: var(--muted); margin-bottom: 1.5rem; max-width: 600px;">Patient admitted for dizziness. Diagnosed with primary hypertension. Initiated on Lisinopril 10mg.</p>
+                        <a class="action-link">View Full Record</a>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="rx-box">
+                    <h3 class="small-caps" style="margin-bottom: 2rem;">Active Prescriptions</h3>
+                    <div style="margin-bottom: 1.5rem;">
+                        <p style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.2rem;">Losartan 50mg</p>
+                        <p class="muted" style="font-size: 0.9rem;">1 tablet daily (Morning) · 14 days remaining</p>
+                    </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <p style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.2rem;">Amlodipine 5mg</p>
+                        <p class="muted" style="font-size: 0.9rem;">1 tablet daily (Evening) · 28 days remaining</p>
+                    </div>
+                    <a class="action-link">Modify Regimen</a>
+                </div>
+
+                <div class="rx-box" style="border-color: var(--border)">
+                    <h3 class="small-caps" style="color: var(--accent); margin-bottom: 1.5rem;">Status</h3>
+                    <p class="serif" style="font-size: 1.5rem; line-height: 1.2; margin-bottom: 1rem;">Patient is 2 days overdue for scheduled cardiovascular follow-up.</p>
+                    <a class="action-link" style="color: var(--accent); border-color: var(--accent)">Send Reminder</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. APPOINTMENTS PAGE -->
+    <div id="page-appointments" class="page container">
+        <div style="padding: 4rem 0 2rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end;">
+            <h1 class="serif" style="font-size: 3.5rem; font-weight: 300;">Appointments</h1>
+            <a onclick="navigate('form')" class="action-link" style="color: var(--accent); border-color: var(--accent)">+ Schedule New</a>
+        </div>
+
+        <div style="display: flex; gap: 2rem; padding: 2rem 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem;">
+            <a class="action-link" style="border-bottom-width: 2px;">All</a>
+            <a class="action-link" style="color: var(--muted); border-color: transparent;">Today</a>
+            <a class="action-link" style="color: var(--muted); border-color: transparent;">This Week</a>
+            <a class="action-link" style="color: var(--accent); border-color: transparent;">Overdue</a>
+        </div>
+
+        <table>
+            <thead>
+                <tr class="small-caps">
+                    <th>Date / Time</th>
+                    <th>Patient</th>
+                    <th>Type</th>
+                    <th>Doctor</th>
+                    <th>Clinic</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="serif" style="font-size: 1.1rem">Oct 14 — 09:00</td>
+                    <td style="font-weight: 600;">Habimana, Jean-Paul</td>
+                    <td class="muted">Post-op review</td>
+                    <td class="muted">Dr. Uwase</td>
+                    <td class="muted">KFH</td>
+                    <td style="text-align: right;">
+                        <a onclick="navigate('profile')" class="action-link" style="margin-right: 1rem;">View</a>
+                        <a class="action-link" style="color: var(--accent); border-color: var(--accent);">Reschedule</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="serif" style="font-size: 1.1rem">Oct 14 — 11:30</td>
+                    <td style="font-weight: 600;">Mukamana, Claudine</td>
+                    <td class="muted">Consultation</td>
+                    <td class="muted">Dr. Uwase</td>
+                    <td class="muted">KFH</td>
+                    <td style="text-align: right;">
+                        <a onclick="navigate('profile')" class="action-link" style="margin-right: 1rem;">View</a>
+                        <a class="action-link">Reschedule</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="serif" style="font-size: 1.1rem">Oct 15 — 08:00</td>
+                    <td style="font-weight: 600;">Ndayisaba, Fabrice</td>
+                    <td class="muted">Medication check</td>
+                    <td class="muted">Dr. Murenzi</td>
+                    <td class="muted">CHUK</td>
+                    <td style="text-align: right;">
+                        <a onclick="navigate('profile')" class="action-link" style="margin-right: 1rem;">View</a>
+                        <a class="action-link">Reschedule</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="serif" style="font-size: 1.1rem">Oct 16 — 14:00</td>
+                    <td style="font-weight: 600;">Kwizera, Emmanuel</td>
+                    <td class="muted">Routine</td>
+                    <td class="muted">Dr. Uwase</td>
+                    <td class="muted">KFH</td>
+                    <td style="text-align: right;">
+                        <a onclick="navigate('profile')" class="action-link" style="margin-right: 1rem;">View</a>
+                        <a class="action-link">Reschedule</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 7. FOLLOW-UP FORM PAGE -->
+    <div id="page-form" class="page container">
+        <div style="max-width: 800px; margin: 0 auto; padding: 6rem 0;">
+            <a onclick="navigate('dashboard')" class="action-link" style="margin-bottom: 3rem; color: var(--muted); border-color: var(--muted)">← Dismiss</a>
+            
+            <h1 class="serif" style="font-size: 3.5rem; font-weight: 300; margin-bottom: 4rem; border-bottom: 1px solid var(--border); padding-bottom: 2rem;">Record an Interaction</h1>
+
+            <form onsubmit="event.preventDefault(); navigate('profile');">
+                <div style="margin-bottom: 3rem;">
+                    <label class="small-caps muted" style="display: block; margin-bottom: 1rem;">Patient Identity</label>
+                    <input type="text" value="Habimana, Jean-Paul" required style="font-size: 1.5rem; font-family: var(--font-serif)">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-bottom: 3rem;">
+                    <div>
+                        <label class="small-caps muted" style="display: block; margin-bottom: 1rem;">Interaction Date</label>
+                        <input type="text" value="October 14, 2026" required>
+                    </div>
+                    <div>
+                        <label class="small-caps muted" style="display: block; margin-bottom: 1rem;">Diagnosis / Condition</label>
+                        <input type="text" value="Primary Hypertension" required>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 3rem;">
+                    <label class="small-caps muted" style="display: block; margin-bottom: 1rem;">Clinical Observations & Notes</label>
+                    <textarea rows="6" placeholder="Enter detailed clinical narrative..." required></textarea>
+                </div>
+
+                <div style="margin-bottom: 4rem;">
+                    <label class="small-caps muted" style="display: block; margin-bottom: 1rem;">Prescription Modifications</label>
+                    <textarea rows="3" placeholder="Identify changes to dosage or frequency..." required></textarea>
+                </div>
+
+                <div style="margin-bottom: 4rem;">
+                    <label class="small-caps muted" style="display: block; margin-bottom: 1rem;">Next Required Assessment (Date)</label>
+                    <input type="text" placeholder="e.g. November 14, 2026" required>
+                </div>
+
+                <button type="submit" class="btn btn-solid" style="font-size: 1rem;">Submit Clinical Record</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Set dynamic date
+        const dateEl = document.getElementById('current-date');
+        if (dateEl) {
+            const options = { month: 'long', day: 'numeric', year: 'numeric' };
+            dateEl.textContent = new Date().toLocaleDateString('en-US', options);
+        }
+
+        // Vanilla JS Router
+        function navigate(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show target page
+            const target = document.getElementById('page-' + pageId);
+            if (target) {
+                target.classList.add('active');
+                
+                // Only scroll to top if not already near the top
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                
+                // Update URL without modifying history
+                window.history.replaceState(null, '', '#' + pageId);
+            }
+        }
+
+        // Add back-button/forward-button support
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && document.getElementById('page-' + hash)) {
+                // To avoid causing loop with replaceState logic
+                document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+                document.getElementById('page-' + hash).classList.add('active');
+            }
+        });
+
+        // Initialize with hash or home
+        window.addEventListener('load', () => {
+            const hash = window.location.hash.replace('#', '');
+            if (hash && document.getElementById('page-' + hash)) {
+                navigate(hash);
+            } else {
+                navigate('home');
+            }
+        });
+    </script>
+</body>
+</html>

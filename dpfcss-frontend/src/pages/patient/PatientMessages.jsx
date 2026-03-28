@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { Send, Search, MessageCircle } from 'lucide-react';
 import Sidebar from '../../components/layout/Sidebar';
 import api from '../../api/axios';
 import useAuthStore from '../../store/authStore';
@@ -42,7 +40,7 @@ function MessagingPage() {
             const { data } = await api.post(`/messages/${selected.partner._id}`, { content: input.trim() });
             setMessages((prev) => [...prev, data]);
             setInput('');
-        } catch { toast.error('Failed to send message.'); }
+        } catch { toast.error('Failed to send transimission.'); }
         finally { setSending(false); }
     };
 
@@ -53,121 +51,141 @@ function MessagingPage() {
     return (
         <div>
             <Sidebar />
-            <main className="page-content" style={{ padding: 0, height: '100vh', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ margin: '1.5rem 2rem 1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <MessageCircle size={20} color="var(--accent-blue)" />
-                    <h1 style={{ fontWeight: 800, fontSize: '1.4rem', color: 'var(--text-primary)' }}>Messages</h1>
-                </div>
-
-                <div style={{
-                    flex: 1, display: 'grid', gridTemplateColumns: '300px 1fr',
-                    margin: '0 2rem 2rem', borderRadius: '1rem',
-                    border: '1px solid var(--border)', overflow: 'hidden',
-                    background: 'var(--bg-card)', backdropFilter: 'blur(16px)',
-                    minHeight: 0,
-                }}>
-                    {/* Conversation list */}
-                    <div style={{ borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)' }}>
-                            <div style={{ position: 'relative' }}>
-                                <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                                <input className="input" style={{ paddingLeft: '2.1rem', padding: '0.55rem 0.75rem 0.55rem 2.1rem', fontSize: '0.85rem' }}
-                                    placeholder="Search chats..." value={search} onChange={(e) => setSearch(e.target.value)} />
-                            </div>
+            <main className="page-content" style={{ padding: '0', display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+                <style>{`
+                    .chat-bubble {
+                        max-width: 65%;
+                        padding: 1rem 1.25rem;
+                        font-size: 0.95rem;
+                        line-height: 1.6;
+                        color: var(--color-primary);
+                    }
+                    .chat-bubble.sent {
+                        background-color: var(--color-border);
+                        align-self: flex-end;
+                        border-top-left-radius: var(--radius-sm);
+                        border-bottom-left-radius: var(--radius-sm);
+                        border-top-right-radius: var(--radius-sm);
+                    }
+                    .chat-bubble.received {
+                        background-color: transparent;
+                        border: 1px solid var(--color-border);
+                        align-self: flex-start;
+                        border-top-right-radius: var(--radius-sm);
+                        border-bottom-right-radius: var(--radius-sm);
+                        border-bottom-left-radius: var(--radius-sm);
+                    }
+                `}</style>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 350px) 1fr', flex: 1, overflow: 'hidden' }}>
+                    
+                    {/* Conversation List */}
+                    <div style={{ borderRight: '1px solid var(--color-primary)', display: 'flex', flexDirection: 'column', backgroundColor: 'transparent' }}>
+                        <div style={{ padding: '3rem 2rem 2rem 2rem', borderBottom: '1px solid var(--color-border)' }}>
+                            <h1 className="editorial-heading" style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Inbox</h1>
+                            <input 
+                                style={{ width: '100%', fontSize: '0.85rem' }}
+                                placeholder="Search communications..." 
+                                value={search} 
+                                onChange={(e) => setSearch(e.target.value)} 
+                            />
                         </div>
+
                         <div style={{ flex: 1, overflowY: 'auto' }}>
                             {filtered.length === 0 && (
-                                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                                    No conversations yet
-                                </div>
+                                <p style={{ padding: '3rem 2rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>No established comms.</p>
                             )}
-                            {filtered.map((conv) => (
-                                <div key={conv.partner._id}
-                                    onClick={() => setSelected(conv)}
-                                    style={{
-                                        padding: '0.875rem 1rem', cursor: 'pointer', display: 'flex', gap: '0.75rem', alignItems: 'center',
-                                        borderBottom: '1px solid var(--border)',
-                                        background: selected?.partner._id === conv.partner._id ? 'rgba(14,165,233,0.1)' : 'transparent',
-                                        transition: 'background 0.15s',
-                                    }}>
-                                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(14,165,233,0.3), rgba(6,214,160,0.3))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'var(--accent-blue)', flexShrink: 0, fontSize: '0.9rem' }}>
-                                        {conv.partner.name?.charAt(0)}
-                                    </div>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <p style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>{conv.partner.name}</p>
-                                            {conv.unreadCount > 0 && (
-                                                <span className="badge badge-blue" style={{ fontSize: '0.7rem', padding: '0.1rem 0.5rem' }}>{conv.unreadCount}</span>
-                                            )}
-                                        </div>
-                                        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '0.1rem' }}>
-                                            {conv.lastMessage?.content || 'No messages yet'}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
+                            
+                            <ul style={{ listStyle: 'none' }}>
+                                {filtered.map((conv) => {
+                                    const isSelected = selected?.partner._id === conv.partner._id;
+                                    return (
+                                        <li key={conv.partner._id}>
+                                            <button 
+                                                onClick={() => setSelected(conv)}
+                                                style={{ 
+                                                    width: '100%', textAlign: 'left', padding: '1.5rem 2rem', cursor: 'pointer', border: 'none', borderBottom: '1px solid var(--color-border)', backgroundColor: isSelected ? 'var(--color-primary)' : 'transparent', color: isSelected ? 'var(--color-bg)' : 'var(--color-primary)', transition: 'background-color var(--transition-fast)' 
+                                                }}
+                                            >
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.5rem' }}>
+                                                    <p style={{ fontWeight: 600, fontSize: '1.05rem' }}>{conv.partner.name}</p>
+                                                    {conv.unreadCount > 0 && (
+                                                        <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.05em', color: isSelected ? 'var(--color-bg)' : 'var(--color-accent)' }}>
+                                                            {conv.unreadCount} NEW
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p style={{ fontSize: '0.85rem', opacity: isSelected ? 0.7 : 0.6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {conv.lastMessage?.content || 'Awaiting transmission'}
+                                                </p>
+                                            </button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
                         </div>
                     </div>
 
-                    {/* Chat window */}
-                    <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                    {/* Chat Window */}
+                    <div style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'transparent' }}>
                         {!selected ? (
-                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem', color: 'var(--text-muted)' }}>
-                                <MessageCircle size={48} strokeWidth={1} />
-                                <p style={{ fontSize: '1rem' }}>Select a conversation to start messaging</p>
+                            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'transparent' }}>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Select a contact</p>
                             </div>
                         ) : (
                             <>
-                                {/* Chat header */}
-                                <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.875rem', background: 'rgba(10,20,50,0.5)' }}>
-                                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(14,165,233,0.3), rgba(6,214,160,0.3))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: 'var(--accent-blue)', fontSize: '0.9rem' }}>
-                                        {selected.partner.name?.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <p style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{selected.partner.name}</p>
-                                        <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
-                                            {selected.partner.role}{selected.partner.specialization ? ` • ${selected.partner.specialization}` : ''}
-                                        </p>
-                                    </div>
+                                {/* Header */}
+                                <div style={{ padding: '3rem 4rem 1.5rem', borderBottom: '1px solid var(--color-border)' }}>
+                                    <h2 className="editorial-heading" style={{ fontSize: '2rem', marginBottom: '0.2rem' }}>{selected.partner.name}</h2>
+                                    <p style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>
+                                        {selected.partner.role}{selected.partner.specialization ? ` • ${selected.partner.specialization}` : ''}
+                                    </p>
                                 </div>
 
-                                {/* Messages */}
-                                <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                                {/* Messages Area */}
+                                <div style={{ flex: 1, overflowY: 'auto', padding: '3rem 4rem', display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
                                     {messages.map((msg, i) => {
                                         const isSent = msg.sender === user?.id || msg.sender?._id === user?.id || msg.sender?.toString() === user?.id;
                                         return (
-                                            <motion.div key={msg._id || i}
-                                                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                                                style={{ display: 'flex', flexDirection: 'column', alignItems: isSent ? 'flex-end' : 'flex-start' }}>
+                                            <div key={msg._id || i} style={{ display: 'flex', flexDirection: 'column', alignItems: isSent ? 'flex-end' : 'flex-start' }}>
                                                 <div className={`chat-bubble ${isSent ? 'sent' : 'received'}`}>
                                                     {msg.content}
                                                 </div>
-                                                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                                                <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--color-text-muted)', marginTop: '0.75rem' }}>
                                                     {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
-                                            </motion.div>
+                                            </div>
                                         );
                                     })}
                                     <div ref={bottomRef} />
                                 </div>
 
-                                {/* Input */}
-                                <form onSubmit={sendMessage} style={{ padding: '1rem 1.25rem', borderTop: '1px solid var(--border)', display: 'flex', gap: '0.75rem', background: 'rgba(5,12,30,0.7)' }}>
-                                    <input className="input" style={{ flex: 1 }}
-                                        placeholder="Type a message..." value={input}
-                                        onChange={(e) => setInput(e.target.value)} />
-                                    <button type="submit" className="btn-primary" disabled={sending || !input.trim()}
-                                        style={{ padding: '0.625rem 1.25rem', flexShrink: 0 }}>
-                                        <Send size={16} />
-                                    </button>
-                                </form>
+                                {/* Input Form */}
+                                <div style={{ padding: '2rem 4rem', borderTop: '1px solid var(--color-border)' }}>
+                                    <form onSubmit={sendMessage} style={{ display: 'flex', gap: '2rem', alignItems: 'flex-end' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <input 
+                                                placeholder="Write transmission..." 
+                                                value={input}
+                                                onChange={(e) => setInput(e.target.value)} 
+                                                style={{ borderBottom: 'none', border: '1px solid var(--color-border)', padding: '1rem', width: '100%', borderRadius: 'var(--radius-sm)' }}
+                                            />
+                                        </div>
+                                        <button type="submit" className="btn-primary" disabled={sending || !input.trim()}>
+                                            Dispatch
+                                        </button>
+                                    </form>
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: '1rem', letterSpacing: '0.05em' }}>
+                                        End-to-end clinical encryption enabled.
+                                    </p>
+                                </div>
                             </>
                         )}
                     </div>
+
                 </div>
             </main>
         </div>
     );
 }
-
 export default MessagingPage;
