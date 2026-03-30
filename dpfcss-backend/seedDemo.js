@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const User = require('./models/User');
+const Appointment = require('./models/Appointment');
+const Message = require('./models/Message');
 
 const seedDemoData = async () => {
     try {
@@ -44,7 +46,36 @@ const seedDemoData = async () => {
             avatar: 'https://randomuser.me/api/portraits/men/65.jpg'
         });
 
-        console.log('Demo accounts seeded successfully!');
+        await Appointment.deleteMany({});
+        await Appointment.create({
+            patient: patient._id,
+            provider: provider._id,
+            title: 'Post-Discharge Follow-Up',
+            type: 'follow-up',
+            scheduledDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+            duration: 30,
+            location: 'Telehealth / DPFCSS Chat',
+            status: 'scheduled'
+        });
+
+        await Message.deleteMany({});
+        await Message.create([
+            {
+                sender: patient._id,
+                receiver: provider._id,
+                content: 'Hello Dr. Habimana, I am experiencing slight dizziness after my new medication. Is this normal?',
+                read: true,
+                createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
+            },
+            {
+                sender: provider._id,
+                receiver: patient._id,
+                content: 'Hello Uwase. Yes, mild dizziness is normal for the first day, but if it persists tomorrow, please message me here immediately and we will adjust your dose.',
+                read: false
+            }
+        ]);
+
+        console.log('Demo accounts, appointments, and messages seeded successfully!');
     } catch (err) {
         console.error(err);
     } finally {
