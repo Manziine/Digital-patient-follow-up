@@ -1,121 +1,84 @@
-# DPFCSS (Digital Patient Follow-Up and Care Support System)
+# 🏥 Digital Patient Follow-Up & Care Support System (DPFCSS)
 
-Digital Patient Follow-Up and Care Support System — Full-stack healthcare web application optimized for low-bandwidth environments (Rwanda).
+<div align="center">
 
-## Project Structure
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-18-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-This is a monorepo setup containing both the backend API and the frontend application:
-- `dpfcss-backend/` ← Node.js / Express / MongoDB REST API
-- `dpfcss-frontend/` ← React + Vite web application
+<br/>
 
-## Prerequisites
+**A full-stack, enterprise healthcare management platform designed for post-discharge patient care, clinical appointment scheduling, provider consultations, real-time messaging, and medical record tracking.**
 
-Before you begin, ensure you have the following installed on your machine:
-- [Node.js](https://nodejs.org/) (v16.x or higher recommended)
-- [npm](https://www.npmjs.com/) (usually comes with Node.js)
-- [Git](https://git-scm.com/)
+[Frontend Architecture](#-frontend-architecture) · [Backend Architecture](#-backend-api-architecture) · [Quickstart with Docker](#-quickstart-with-docker) · [Deployment](#-cloud-deployment)
 
-You also need a MongoDB database. You can create a free cluster on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) or install MongoDB locally.
-
-## Local Setup Instructions
-
-Follow these step-by-step instructions to get the project completely set up and running locally.
-
-### 1. Clone the repository
-
-First, download the project files by cloning the repository and navigating into it:
-
-```bash
-git clone <repository-url>
-cd Digital-patient-follow-up
-```
-*(Skip this step if you already have the files locally.)*
-
-### 2. Set up the Backend API
-
-Open a terminal and navigate to the backend directory:
-
-```bash
-cd dpfcss-backend
-```
-
-Install the backend dependencies:
-
-```bash
-npm install
-```
-
-Set up the environment variables:
-
-1. Create a file named `.env` in the `dpfcss-backend` folder. You can do this by duplicating the provided example file:
-   ```bash
-   cp .env.example .env
-   ```
-2. Open `.env` in your text editor and fill in the following details:
-   - `MONGODB_URI`: Insert your MongoDB connection string (e.g., from MongoDB Atlas). Replace `<user>` and `<password>` with your database credentials.
-   - `JWT_SECRET`: Add a secure, random string for JSON Web Token authentication (e.g., `my_local_development_secret_key`).
-   - `PORT`: This is set to `5000` by default. It's recommended to leave it as `5000`.
-
-Start the backend development server:
-
-```bash
-npm run dev
-```
-
-The backend should now start up and display a message indicating it is connected to MongoDB and running on `http://localhost:5000`. **Keep this terminal window running.**
-
-### 3. Set up the Frontend Application
-
-Open a **new** terminal window and navigate to the frontend directory (starting from the root project folder):
-
-```bash
-cd dpfcss-frontend
-```
-
-Install the frontend dependencies:
-
-```bash
-npm install
-```
-
-Set up the frontend environment variables:
-
-1. Create a file named `.env` in the `dpfcss-frontend` folder:
-   ```bash
-   cp .env.example .env
-   ```
-2. Open the `.env` file. For local development, the `VITE_API_URL` should be left empty or commented out (as Vite is already configured to proxy `/api` requests to `localhost:5000`).
-   ```env
-   # VITE_API_URL=
-   ```
-
-Start the frontend development server:
-
-```bash
-npm run dev
-```
-
-The frontend will start and typically run on `http://localhost:5173` (or another port shown in the terminal). 
-
-### 4. Verify the Application
-
-1. Open your web browser and navigate to the local URL provided by the frontend terminal (usually `http://localhost:5173`).
-2. You should see the application's landing page!
-3. Click "Get Started" or "Register" to create a new user account and verify that the frontend can successfully communicate with the backend and database.
+</div>
 
 ---
 
-## Features list
+## 🚀 Key Features
 
-- 🔐 **JWT Authentication**: Secure role-based access control for patient, provider, and admin profiles.
-- 🏥 **Patient Dashboard**: Users can manage appointments, track their medication intake, and monitor their health adherence.
-- 👨‍⚕️ **Provider Dashboard**: Healthcare workers can view their patient roster, schedule follow-ups, and manage vital prescriptions.
-- 💬 **Messaging**: Secure and real-time communication platform built to connect patients and providers.
-- 🔔 **Notifications System**: In-app alerts designed to notify users of due tasks and important updates.
-- 📊 **Admin Analytics**: Centralized overview panel displaying critical system statistics.
-- 🌍 **Accessibility**: Application architecture strictly optimized for low-bandwidth environments.
+* **🩺 Multi-Role Portals**: Distinct role-based access control (RBAC) interfaces for **Patients**, **Healthcare Providers (Doctors/Nurses)**, and **Hospital Administrators**.
+* **📅 Appointment & Schedule Engine**: Book, reschedule, approve, and track clinical follow-up sessions.
+* **💬 Provider-Patient Consultation Messaging**: Direct messaging pipeline between patients and their assigned medical care teams.
+* **💊 Medication & Treatment Tracker**: Track active prescriptions, dosage schedules, and treatment adherence.
+* **🤖 AI Health Assistant Chatbot**: Integrated clinical intake chatbot for patient symptom screening and FAQs.
+* **🎨 Editorial UI/UX Design**: Clean, accessible clinical typography and modern dashboard components built with React & Tailwind CSS.
 
-## Troubleshooting
+---
 
-- **Backend fails to connect to the database:** Ensure your MongoDB cluster's IP Access List (in MongoDB Atlas Network Access) allows your current IP address, or use `0.0.0.0/0` for testing purposes. Verify that the username and password in `MONGODB_URI` are correct and don't contain unescaped special characters.
-- **Frontend can't reach the API (Network Errors/CORS):** Ensure the backend terminal is actually running without errors on port 5000. Check the frontend's `vite.config.js` to ensure the proxy is correctly pointed to `http://localhost:5000`.
+## 🏛️ Architecture
+
+```
+                          +-------------------------------+
+                          |    React + Vite Web Client    |
+                          |   (Port 5173 / Tailored UI)   |
+                          +---------------+---------------+
+                                          | (REST / Axios)
+                                          v
+                      +-------------------+-------------------+
+                      |      Node.js / Express Backend API    |
+                      |        (Port 5000 / JWT Auth)         |
+                      +-------------------+-------------------+
+                                          |
+                                          v
+                      +-------------------+-------------------+
+                      |        MongoDB Database Engine        |
+                      |   (Users, Appointments, Messages)     |
+                      +---------------------------------------+
+```
+
+---
+
+## ⚡ Quickstart with Docker
+
+```bash
+# Clone the repository
+git clone https://github.com/Manziine/Digital-patient-follow-up.git
+cd Digital-patient-follow-up
+
+# Launch complete stack (Frontend + Backend + MongoDB)
+docker compose up -d --build
+```
+
+Access services:
+* **Frontend Web Portal**: [http://localhost:5173](http://localhost:5173)
+* **Backend REST API**: [http://localhost:5000](http://localhost:5000)
+
+---
+
+## 👤 Author
+
+**Arnaud Ineza Manzi**
+* GitHub: [@Manziine](https://github.com/Manziine)
+* LinkedIn: [Arnaud Ineza Manzi](https://linkedin.com/in/arnaud-ineza-manzi-471221272)
+* Email: [ainezamanzi@gmail.com](mailto:ainezamanzi@gmail.com)
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
